@@ -1,0 +1,8 @@
+C:\Users\dauks\source\repos\DipendencyInjection\DipendencyInjection\DIContainer\bin\Debug\netcoreapp2.1\DIContainer.deps.json
+C:\Users\dauks\source\repos\DipendencyInjection\DipendencyInjection\DIContainer\bin\Debug\netcoreapp2.1\DIContainer.dll
+C:\Users\dauks\source\repos\DipendencyInjection\DipendencyInjection\DIContainer\bin\Debug\netcoreapp2.1\DIContainer.pdb
+C:\Users\dauks\source\repos\DipendencyInjection\DipendencyInjection\DIContainer\obj\Debug\netcoreapp2.1\DIContainer.csprojAssemblyReference.cache
+C:\Users\dauks\source\repos\DipendencyInjection\DipendencyInjection\DIContainer\obj\Debug\netcoreapp2.1\DIContainer.AssemblyInfoInputs.cache
+C:\Users\dauks\source\repos\DipendencyInjection\DipendencyInjection\DIContainer\obj\Debug\netcoreapp2.1\DIContainer.AssemblyInfo.cs
+C:\Users\dauks\source\repos\DipendencyInjection\DipendencyInjection\DIContainer\obj\Debug\netcoreapp2.1\DIContainer.dll
+C:\Users\dauks\source\repos\DipendencyInjection\DipendencyInjection\DIContainer\obj\Debug\netcoreapp2.1\DIContainer.pdb
