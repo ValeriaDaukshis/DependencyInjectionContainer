@@ -1,18 +1,23 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace DIContainer
 {
     public class DependencyProvider
     {
-        private DependenciesConfiguration _configuration;
-        public DependencyProvider(DependenciesConfiguration configuration)
+        private readonly DependenciesConfiguration _configuration;
+        private readonly ConcurrentStack<Type> _stack;
+        private Type _currentGenericType;
+        public DependencyProvider(DependenciesConfiguration configuration, ConcurrentStack<Type> stack)
         {
             if(ValidateConfiguration(configuration))
             {
                 this._configuration = configuration;
+                _stack = stack;
             }
         }
         
@@ -60,6 +65,7 @@ namespace DIContainer
 
             if (type.IsGenericType)
             {
+                _currentGenericType = type;
                 var genericDefinition = type.GetGenericTypeDefinition();                    
                 _configuration.DependencesList.TryGetValue(genericDefinition, out implementations);
                 if (implementations != null)
@@ -71,7 +77,74 @@ namespace DIContainer
         }
         public object Create(Type type)
         {
-            return null;
+            object result;
+            if (!_stack.Contains(type))
+            {
+                _stack.Push(type);
+
+                if (type.IsGenericTypeDefinition)
+                {
+                    type = type.MakeGenericType(_currentGenericType.GenericTypeArguments);
+                }
+
+                ConstructorInfo constructor = GetConstructor(type);
+
+                if (constructor != null)
+                {
+                    result = constructor.Invoke(GetConstructorParametersValues(constructor.GetParameters()));
+                }
+                else
+                {
+                    throw new ArgumentException("Can not find constructor!");
+                }
+                _stack.TryPop(out type);
+            }
+            else
+            {
+                result = null;
+            }
+
+            return result;
+        }
+
+        private ConstructorInfo GetConstructor(Type t)
+        {
+            ConstructorInfo result = null;
+            ConstructorInfo[] constructors = t.GetConstructors();
+            bool isRight;
+
+            foreach (ConstructorInfo constructor in constructors)
+            {
+                ParameterInfo[] parameters = constructor.GetParameters();
+
+                isRight = true;
+                foreach (ParameterInfo parameter in parameters)
+                {
+                    if (!_configuration.DependencesList.ContainsKey(parameter.ParameterType))
+                    {
+                        isRight = false;
+                        break;
+                    }
+                }
+
+                if (isRight)
+                {
+                    result = constructor;
+                    break;
+                }
+            }
+            return result;
+        }
+        
+        private object[] GetConstructorParametersValues(ParameterInfo[] parameters)
+        {
+            object[] result = new object[parameters.Length];
+
+            for (int i=0; i<parameters.Length; i++)
+            {
+                result[i] = Resolve(parameters[i].ParameterType);
+            }
+            return result;
         }
 
         private object CreateGeneric(Type type)
