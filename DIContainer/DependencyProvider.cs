@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -12,10 +13,6 @@ namespace DIContainer
             if(ValidateConfiguration(configuration))
             {
                 this._configuration = configuration;
-            }
-            else
-            {
-                throw new ArgumentException("Config is not valid");
             }
         }
         
@@ -31,13 +28,13 @@ namespace DIContainer
 
                         if (implementation.IsAbstract || implementation.IsInterface || !dependences.IsAssignableFrom(implementation))
                         {
-                            return false;
+                            throw new ArgumentException("Config is not valid");
                         }
                     }
                 }
                 else
                 {
-                    return false;
+                    throw new ArgumentException("Config is not valid");
                 }
             }
             return true;
@@ -79,17 +76,30 @@ namespace DIContainer
 
         private object CreateGeneric(Type type)
         {
-            return null;
-        }
-        
-        private object GetInstance(ImplementationInfo tImplementation)
-        {
-            if (tImplementation.SingleTone)
+            Type resolve = type.GetGenericArguments()[0];
+            
+            _configuration.DependencesList.TryGetValue(resolve,out List<ImplementationInfo> implementations);
+            if (implementations != null)
             {
-                return tImplementation.SingleToneRealization.GetInstance(this);
+                var result = Activator.CreateInstance(typeof(List<>).MakeGenericType(resolve));
+                foreach (ImplementationInfo implementation in implementations)
+                {
+                    ((IList)result).Add(GetInstance(implementation));
+                }
+                return result;
             }
             
-            return Create(tImplementation.ImplementationType);
+            throw new ArgumentException("Unknown type "+type.Name);
+        }
+        
+        private object GetInstance(ImplementationInfo implementation)
+        {
+            if (implementation.SingleTone)
+            {
+                return implementation.SingleToneRealization.GetInstance(this);
+            }
+            
+            return Create(implementation.ImplementationType);
         }
     }
 }
