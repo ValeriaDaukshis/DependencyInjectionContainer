@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DIContainer", "DIContainer\DIContainer.csproj", "{BCAD9947-8408-411E-9AB0-05EF97D3308C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DITests", "DITests\DITests.csproj", "{8CDA7CAC-84D8-44EA-ACBC-64F115E2885A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{BCAD9947-8408-411E-9AB0-05EF97D3308C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BCAD9947-8408-411E-9AB0-05EF97D3308C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BCAD9947-8408-411E-9AB0-05EF97D3308C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8CDA7CAC-84D8-44EA-ACBC-64F115E2885A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8CDA7CAC-84D8-44EA-ACBC-64F115E2885A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8CDA7CAC-84D8-44EA-ACBC-64F115E2885A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8CDA7CAC-84D8-44EA-ACBC-64F115E2885A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

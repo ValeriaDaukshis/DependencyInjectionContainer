@@ -12,12 +12,12 @@ namespace DIContainer
         private readonly DependenciesConfiguration _configuration;
         private readonly ConcurrentStack<Type> _stack;
         private Type _currentGenericType;
-        public DependencyProvider(DependenciesConfiguration configuration, ConcurrentStack<Type> stack)
+        public DependencyProvider(DependenciesConfiguration configuration)
         {
             if(ValidateConfiguration(configuration))
             {
                 this._configuration = configuration;
-                _stack = stack;
+                _stack = new ConcurrentStack<Type>();
             }
         }
         
@@ -25,21 +25,19 @@ namespace DIContainer
         {
             foreach (Type dependences in dependenciesConfiguration.DependencesList.Keys)
             {
-                if (!dependences.IsValueType)
-                {
-                    foreach (ImplementationInfo dependency in dependenciesConfiguration.DependencesList[dependences])
-                    {
-                        Type implementation = dependency.ImplementationType;
-
-                        if (implementation.IsAbstract || implementation.IsInterface || !dependences.IsAssignableFrom(implementation))
-                        {
-                            throw new ArgumentException("Config is not valid");
-                        }
-                    }
-                }
-                else
+                if (dependences.IsValueType)
                 {
                     throw new ArgumentException("Config is not valid");
+                }
+                
+                foreach (ImplementationInfo dependency in dependenciesConfiguration.DependencesList[dependences])
+                { 
+                    Type implementation = dependency.ImplementationType;
+                    if (implementation.IsAbstract || implementation.IsInterface ||
+                        !dependences.IsAssignableFrom(implementation))
+                    {
+                        throw new ArgumentException("Config is not valid");
+                    }
                 }
             }
             return true;
@@ -48,7 +46,6 @@ namespace DIContainer
         public T Resolve<T>() where T: class
         {
             Type t = typeof(T);
-
             return (T)Resolve(t);
         }
         
@@ -61,7 +58,9 @@ namespace DIContainer
             
             _configuration.DependencesList.TryGetValue(type, out List<ImplementationInfo> implementations);
             if (implementations != null)
+            {
                 return GetInstance(implementations.First());
+            }
 
             if (type.IsGenericType)
             {
@@ -69,7 +68,9 @@ namespace DIContainer
                 var genericDefinition = type.GetGenericTypeDefinition();                    
                 _configuration.DependencesList.TryGetValue(genericDefinition, out implementations);
                 if (implementations != null)
+                {
                     return GetInstance(implementations.First());
+                }
             }
             
             throw new ArgumentException("Unknown type " + type.Name);
@@ -102,6 +103,7 @@ namespace DIContainer
             else
             {
                 result = null;
+                _stack.Clear();
             }
 
             return result;
@@ -152,17 +154,17 @@ namespace DIContainer
             Type resolve = type.GetGenericArguments()[0];
             
             _configuration.DependencesList.TryGetValue(resolve,out List<ImplementationInfo> implementations);
-            if (implementations != null)
+            if(implementations is null)
             {
-                var result = Activator.CreateInstance(typeof(List<>).MakeGenericType(resolve));
-                foreach (ImplementationInfo implementation in implementations)
-                {
-                    ((IList)result).Add(GetInstance(implementation));
-                }
-                return result;
+                throw new ArgumentNullException(nameof(implementations));
             }
             
-            throw new ArgumentException("Unknown type "+type.Name);
+            var result = Activator.CreateInstance(typeof(List<>).MakeGenericType(resolve));
+            foreach (ImplementationInfo implementation in implementations)
+            {
+                ((IList)result).Add(GetInstance(implementation));
+            }
+            return result;
         }
         
         private object GetInstance(ImplementationInfo implementation)
