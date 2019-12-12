@@ -29,21 +29,11 @@ namespace DIContainer
                 {
                     throw new ArgumentException("Config is not valid");
                 }
-                
-                foreach (ImplementationInfo dependency in dependenciesConfiguration.DependencesList[dependences])
-                { 
-                    Type implementation = dependency.ImplementationType;
-                    if (implementation.IsAbstract || implementation.IsInterface ||
-                        !dependences.IsAssignableFrom(implementation))
-                    {
-                        throw new ArgumentException("Config is not valid");
-                    }
-                }
             }
             return true;
         }
         
-        public T Resolve<T>() where T: class
+        public T Resolve<T>() 
         {
             Type t = typeof(T);
             return (T)Resolve(t);
@@ -53,7 +43,7 @@ namespace DIContainer
         {
             if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IEnumerable<>))
             {
-                return CreateGeneric(type);
+                return CreateGenericType(type);
             }
             
             _configuration.DependencesList.TryGetValue(type, out List<ImplementationInfo> implementations);
@@ -73,7 +63,7 @@ namespace DIContainer
                 }
             }
             
-            throw new ArgumentException("Unknown type " + type.Name);
+            throw new ArgumentException("wrong type");
             
         }
         public object Create(Type type)
@@ -96,7 +86,7 @@ namespace DIContainer
                 }
                 else
                 {
-                    throw new ArgumentException("Can not find constructor!");
+                    throw new ArgumentException("Can not find constructor");
                 }
                 _stack.TryPop(out type);
             }
@@ -113,13 +103,12 @@ namespace DIContainer
         {
             ConstructorInfo result = null;
             ConstructorInfo[] constructors = t.GetConstructors();
-            bool isRight;
 
             foreach (ConstructorInfo constructor in constructors)
             {
                 ParameterInfo[] parameters = constructor.GetParameters();
 
-                isRight = true;
+                var isRight = true;
                 foreach (ParameterInfo parameter in parameters)
                 {
                     if (!_configuration.DependencesList.ContainsKey(parameter.ParameterType))
@@ -149,7 +138,7 @@ namespace DIContainer
             return result;
         }
 
-        private object CreateGeneric(Type type)
+        private object CreateGenericType(Type type)
         {
             Type resolve = type.GetGenericArguments()[0];
             

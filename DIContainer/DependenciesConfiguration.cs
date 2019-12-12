@@ -6,17 +6,19 @@ namespace DIContainer
 {
     public class DependenciesConfiguration
     {
-        public ConcurrentDictionary<Type, List<ImplementationInfo>> DependencesList { get; set; }
+        public ConcurrentDictionary<Type, List<ImplementationInfo>> DependencesList { get; }
         public DependenciesConfiguration()
         {
             DependencesList = new ConcurrentDictionary<Type, List<ImplementationInfo>>();
         }
 
         public void Register<TDependency, TImplementation>(bool singleTone = false)
+            where TDependency : class
+            where TImplementation : class, TDependency
         {
             Register(typeof(TDependency), typeof(TImplementation), singleTone);
         }
-        
+
         public void Register(Type dependency, Type implementation, bool singleTone = false)
         {
             ImplementationInfo implementationInfo = new ImplementationInfo(implementation, singleTone);

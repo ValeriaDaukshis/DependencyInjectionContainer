@@ -4,14 +4,13 @@ namespace DIContainer
 {
     public sealed class SingleToneRealization
     {
-        private static volatile object _syncRoot;
+        private static volatile object _syncRoot = new object();
         private object _instance;
         private readonly Type _implementationType;
 
         public SingleToneRealization(Type implementationType)
         {
             this._implementationType = implementationType;
-            _syncRoot = new object();
             _instance = null;
         }
         
